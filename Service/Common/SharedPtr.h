@@ -32,7 +32,7 @@ namespace Service
 	};
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr<T>(T& data) :
+	SharedPtr<T>::SharedPtr(T& data) :
 		counter{ new uint32_t{ 1 } },
 		pointer{ &data }
 	{
@@ -40,7 +40,7 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr<T>() :
+	SharedPtr<T>::SharedPtr() :
 		counter{ nullptr },
 		pointer{ nullptr }
 	{
@@ -48,14 +48,14 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr<T>(std::nullptr_t) :
+	SharedPtr<T>::SharedPtr(std::nullptr_t) :
 		SharedPtr{}
 	{
 
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr<T>(const SharedPtr<T>& y) :
+	SharedPtr<T>::SharedPtr(const SharedPtr<T>& y) :
 		counter{ y.counter },
 		pointer{ y.pointer }
 	{
@@ -64,7 +64,7 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr<T>(SharedPtr<T>&& y) :
+	SharedPtr<T>::SharedPtr(SharedPtr<T>&& y) :
 		counter{ y.counter },
 		pointer{ y.pointer }
 	{
