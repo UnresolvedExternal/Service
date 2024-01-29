@@ -8,7 +8,7 @@ using Union::StringANSI;
 namespace std
 {
 	template <>
-	struct hash<StringANSI> : hash<string_view>
+	struct hash<StringANSI> : private hash<string_view>
 	{
 		size_t operator()(const StringANSI& x) const;
 	};
@@ -28,9 +28,17 @@ namespace std
 	template <>
 	struct formatter<StringANSI> : public formatter<string_view>
 	{
-		auto format(const StringANSI& text, format_context& context);
+		auto format(const StringANSI& text, format_context& context) const;
 	};
+}
 
+namespace Union
+{
+	std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right);
+}
+
+namespace std
+{
 	size_t hash<StringANSI>::operator()(const StringANSI& x) const
 	{
 		StringANSI copy{ x };
@@ -48,8 +56,20 @@ namespace std
 		return x.GetDifference(y, Union::StringBase::Flags::IgnoreCase);
 	}
 
-	auto formatter<StringANSI>::format(const StringANSI& text, format_context& context)
+	auto formatter<StringANSI>::format(const StringANSI& text, format_context& context) const
 	{
 		return formatter<string_view>::format(string_view{ text }, context);
+	}
+}
+
+namespace Union
+{
+	std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right)
+	{
+		const auto diff = left.GetDifference(right, StringBase::Flags::IgnoreCase);
+
+		if (diff < 0) return std::weak_ordering::less;
+		if (diff > 0) return std::weak_ordering::greater;
+		return std::weak_ordering::equivalent;
 	}
 }
