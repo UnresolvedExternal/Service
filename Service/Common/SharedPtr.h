@@ -2,7 +2,7 @@
 
 namespace Service
 {
-	// single threaded smart pointer
+	// Single threaded smart pointer
 	template <typename T>
 	class SharedPtr
 	{
