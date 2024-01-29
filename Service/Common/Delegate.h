@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <unordered_set>
 #include <functional>
 #include "SharedPtr.h"
 
 namespace Service
 {
-	// comparable callable object
+	// Comparable callable object
 	template <typename T>
 	class Delegate
 	{
@@ -33,16 +34,14 @@ namespace Service
 		SharedPtr<std::function<T>> function;
 	};
 
-	// ordered list of delegates
+	// Ordered list of delegates
+	// MUST NOT contain dublicates
+	// MUST NOT do recursive calls
+	// Added/removed during the call delegates are not called
 	template <class T>
 	class DelegateList
 	{
 	public:
-
-		// safe call of all delegates
-		// recursion is unsupported
-		// removed delegate could not be called
-		// added delegate could not be called before the next call
 		template <class ...TArgs>
 		void operator()(TArgs&& ... args) const;
 
@@ -52,14 +51,14 @@ namespace Service
 
 	private:
 		std::vector<Delegate<T>> delegates;
+		std::unordered_set<std::function<T>*> set;
 	};
 
 	template <typename T>
 	Delegate<T>::Delegate() :
 		function{ MakeShared<std::function<T>>(nullptr) }
 	{
-		std::function<int()> x;
-		x();
+
 	}
 
 	template <typename T>
@@ -102,13 +101,14 @@ namespace Service
 		auto copy{ delegates };
 
 		for (const auto& delegate : copy)
-			if (std::find(begin(delegates), end(delegates), delegate) != end(delegates))
+			if (set.find(delegate.GetFunction()) != end(set))
 				delegate(args...);
 	}
 
 	template <typename T>
 	DelegateList<T>& DelegateList<T>::operator+=(const Delegate<T>& delegate)
 	{
+		set.insert(delegate.GetFunction());
 		delegates.emplace_back(delegate);
 		return *this;
 	}
@@ -116,6 +116,7 @@ namespace Service
 	template <typename T>
 	DelegateList<T>& DelegateList<T>::operator+=(Delegate<T>&& delegate)
 	{
+		set.insert(delegate.GetFunction());
 		delegates.push_back(std::move(delegate));
 		return *this;
 	}
@@ -123,8 +124,11 @@ namespace Service
 	template <typename T>
 	DelegateList<T>& DelegateList<T>::operator-=(const Delegate<T>& delegate)
 	{
-		if (auto it = std::find(begin(delegates), end(delegates), delegate); it != end(delegates))
-			delegates.erase(it);
+		if (auto it = set.find(delegate.GetFunction()); it != end(set))
+		{
+			set.erase(it);
+			delegates.erase(std::find(begin(delegates), end(delegates), delegate));
+		}
 
 		return *this;
 	}
