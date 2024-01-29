@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_set>
 #include <functional>
-#include "SharedPtr.h"
+#include <Service/Common/SharedPtr.h>
 
 namespace Service
 {
