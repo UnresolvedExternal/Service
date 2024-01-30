@@ -7,14 +7,18 @@
 
 namespace Service
 {
+	struct DelegateBase {};
+
 	// Comparable callable object
 	template <typename T>
-	class Delegate
+		requires requires(T& t) { t(); }
+	class Delegate : public DelegateBase
 	{
 	public:
 		Delegate();
 
 		template <typename TFunc>
+			requires (!std::is_base_of_v<DelegateBase, std::decay_t<TFunc>>)
 		Delegate(TFunc&& function);
 
 		Delegate(const Delegate&) = default;
@@ -26,7 +30,7 @@ namespace Service
 		bool operator!=(const Delegate& right) const;
 
 		template <class ...TArgs>
-		auto operator()(TArgs&& ...args) const;
+		typename std::function<T>::result_type operator()(TArgs&& ...args) const;
 
 		const std::function<T>* GetFunction() const;
 
@@ -39,6 +43,7 @@ namespace Service
 	// MUST NOT do recursive calls
 	// Added/removed during the call delegates are not called
 	template <class T>
+		requires std::is_same_v<typename std::function<T>::result_type, void>
 	class DelegateList
 	{
 	public:
@@ -51,10 +56,11 @@ namespace Service
 
 	private:
 		std::vector<Delegate<T>> delegates;
-		std::unordered_set<std::function<T>*> set;
+		std::unordered_set<const std::function<T>*> set;
 	};
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	Delegate<T>::Delegate() :
 		function{ MakeShared<std::function<T>>(nullptr) }
 	{
@@ -62,7 +68,9 @@ namespace Service
 	}
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	template <typename TFunc>
+		requires (!std::is_base_of_v<DelegateBase, std::decay_t<TFunc>>)
 	Delegate<T>::Delegate(TFunc&& function) :
 		function{ MakeShared<std::function<T>>(std::forward<TFunc>(function)) }
 	{
@@ -70,31 +78,36 @@ namespace Service
 	}
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	bool Delegate<T>::operator==(const Delegate<T>& right) const
 	{
 		return function == right.function;
 	}
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	bool Delegate<T>::operator!=(const Delegate<T>& right) const
 	{
 		return function != right.function;
 	}
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	template <typename ...TArgs>
-	auto Delegate<T>::operator()(TArgs&& ...args) const
+	typename std::function<T>::result_type Delegate<T>::operator()(TArgs&& ...args) const
 	{
 		return (*function)(std::forward<TArgs>(args)...);
 	}
 
 	template <typename T>
+		requires requires(T& t) { t(); }
 	const std::function<T>* Delegate<T>::GetFunction() const
 	{
-		return function;
+		return function.Get();
 	}
 
 	template <typename T>
+		requires std::is_same_v<typename std::function<T>::result_type, void>
 	template <class ...TArgs>
 	void DelegateList<T>::operator()(TArgs&&... args) const
 	{
@@ -106,6 +119,7 @@ namespace Service
 	}
 
 	template <typename T>
+		requires std::is_same_v<typename std::function<T>::result_type, void>
 	DelegateList<T>& DelegateList<T>::operator+=(const Delegate<T>& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -114,6 +128,7 @@ namespace Service
 	}
 
 	template <typename T>
+		requires std::is_same_v<typename std::function<T>::result_type, void>
 	DelegateList<T>& DelegateList<T>::operator+=(Delegate<T>&& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -122,6 +137,7 @@ namespace Service
 	}
 
 	template <typename T>
+		requires std::is_same_v<typename std::function<T>::result_type, void>
 	DelegateList<T>& DelegateList<T>::operator-=(const Delegate<T>& delegate)
 	{
 		if (auto it = set.find(delegate.GetFunction()); it != end(set))
