@@ -9,16 +9,23 @@ namespace Service
 {
 	struct DelegateBase {};
 
-	// Comparable callable object
 	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	concept Callable = std::is_convertible_v<T, std::function<T>>;
+
+	template <typename T>
+	concept ReturnsVoid = std::is_same_v<typename std::function<T>::result_type, void>;
+
+	template <typename T>
+	concept NonDelegate = !std::is_base_of_v<DelegateBase, std::decay_t<T>>;
+
+	// Comparable callable object
+	template <Callable T>
 	class Delegate : public DelegateBase
 	{
 	public:
 		Delegate();
 
-		template <typename TFunc>
-			requires (!std::is_base_of_v<DelegateBase, std::decay_t<TFunc>>)
+		template <NonDelegate TFunc>
 		Delegate(TFunc&& function);
 
 		Delegate(const Delegate&) = default;
@@ -42,8 +49,7 @@ namespace Service
 	// MUST NOT contain dublicates
 	// MUST NOT do recursive calls
 	// Added/removed during the call delegates are not called
-	template <class T>
-		requires std::is_same_v<typename std::function<T>::result_type, void>
+	template <ReturnsVoid T>
 	class DelegateList
 	{
 	public:
@@ -59,55 +65,47 @@ namespace Service
 		std::unordered_set<const std::function<T>*> set;
 	};
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	template <Callable T>
 	Delegate<T>::Delegate() :
 		function{ MakeShared<std::function<T>>(nullptr) }
 	{
 
 	}
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
-	template <typename TFunc>
-		requires (!std::is_base_of_v<DelegateBase, std::decay_t<TFunc>>)
+	template <Callable T>
+	template <NonDelegate TFunc>
 	Delegate<T>::Delegate(TFunc&& function) :
 		function{ MakeShared<std::function<T>>(std::forward<TFunc>(function)) }
 	{
 
 	}
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	template <Callable T>
 	bool Delegate<T>::operator==(const Delegate<T>& right) const
 	{
 		return function == right.function;
 	}
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	template <Callable T>
 	bool Delegate<T>::operator!=(const Delegate<T>& right) const
 	{
 		return function != right.function;
 	}
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	template <Callable T>
 	template <typename ...TArgs>
 	typename std::function<T>::result_type Delegate<T>::operator()(TArgs&& ...args) const
 	{
 		return (*function)(std::forward<TArgs>(args)...);
 	}
 
-	template <typename T>
-		requires std::is_convertible_v<T, std::function<T>>
+	template <Callable T>
 	const std::function<T>* Delegate<T>::GetFunction() const
 	{
 		return function.Get();
 	}
 
-	template <typename T>
-		requires std::is_same_v<typename std::function<T>::result_type, void>
+	template <ReturnsVoid T>
 	template <class ...TArgs>
 	void DelegateList<T>::operator()(TArgs&&... args) const
 	{
@@ -118,8 +116,7 @@ namespace Service
 				delegate(args...);
 	}
 
-	template <typename T>
-		requires std::is_same_v<typename std::function<T>::result_type, void>
+	template <ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator+=(const Delegate<T>& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -127,8 +124,7 @@ namespace Service
 		return *this;
 	}
 
-	template <typename T>
-		requires std::is_same_v<typename std::function<T>::result_type, void>
+	template <ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator+=(Delegate<T>&& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -136,8 +132,7 @@ namespace Service
 		return *this;
 	}
 
-	template <typename T>
-		requires std::is_same_v<typename std::function<T>::result_type, void>
+	template <ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator-=(const Delegate<T>& delegate)
 	{
 		if (auto it = set.find(delegate.GetFunction()); it != end(set))
