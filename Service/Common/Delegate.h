@@ -11,7 +11,7 @@ namespace Service
 
 	// Comparable callable object
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	class Delegate : public DelegateBase
 	{
 	public:
@@ -60,7 +60,7 @@ namespace Service
 	};
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	Delegate<T>::Delegate() :
 		function{ MakeShared<std::function<T>>(nullptr) }
 	{
@@ -68,7 +68,7 @@ namespace Service
 	}
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	template <typename TFunc>
 		requires (!std::is_base_of_v<DelegateBase, std::decay_t<TFunc>>)
 	Delegate<T>::Delegate(TFunc&& function) :
@@ -78,21 +78,21 @@ namespace Service
 	}
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	bool Delegate<T>::operator==(const Delegate<T>& right) const
 	{
 		return function == right.function;
 	}
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	bool Delegate<T>::operator!=(const Delegate<T>& right) const
 	{
 		return function != right.function;
 	}
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	template <typename ...TArgs>
 	typename std::function<T>::result_type Delegate<T>::operator()(TArgs&& ...args) const
 	{
@@ -100,7 +100,7 @@ namespace Service
 	}
 
 	template <typename T>
-		requires requires(T& t) { t(); }
+		requires std::is_convertible_v<T, std::function<T>>
 	const std::function<T>* Delegate<T>::GetFunction() const
 	{
 		return function.Get();
