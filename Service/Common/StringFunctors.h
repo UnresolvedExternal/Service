@@ -25,7 +25,7 @@ namespace std
 		bool operator()(const StringANSI& x, const StringANSI& y) const;
 	};
 
-#if _MSVC_LANG > 202002L
+#if __cplusplus > 202002L
 
 	template <>
 	struct formatter<StringANSI> : public formatter<string_view>
@@ -60,7 +60,7 @@ namespace std
 		return x.GetDifference(y, Union::StringBase::Flags::IgnoreCase);
 	}
 
-#if _MSVC_LANG > 202002L
+#if __cplusplus > 202002L
 
 	auto formatter<StringANSI>::format(const StringANSI& text, format_context& context) const
 	{

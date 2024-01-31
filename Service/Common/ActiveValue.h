@@ -26,7 +26,7 @@ namespace Service
 	};
 }
 
-#if _MSVC_LANG > 202002L
+#if __cplusplus > 202002L
 
 namespace std
 {
@@ -84,7 +84,7 @@ namespace Service
 	}
 }
 
-#if _MSVC_LANG > 202002L
+#if __cplusplus > 202002L
 
 namespace std
 {
