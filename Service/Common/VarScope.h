@@ -16,7 +16,7 @@ namespace Service
 
 		VarScope(VarScope&& scope);
 		VarScope& operator=(VarScope&& right);
-		void Restore();
+		VarScope& Restore();
 		void Disable();
 		~VarScope();
 
@@ -68,9 +68,10 @@ namespace Service
 	}
 
 	template <typename T>
-	void VarScope<T>::Restore()
+	VarScope<T>& VarScope<T>::Restore()
 	{
 		*var = value;
+		return *this;
 	}
 
 	template <typename T>
