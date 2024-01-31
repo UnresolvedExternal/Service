@@ -5,3 +5,4 @@
 #include <Service/Common/StringFunctors.h>
 #include <Service/Common/ActiveValue.h>
 #include <Service/Common/VarScope.h>
+#include <Service/Common/EventManager.h>
