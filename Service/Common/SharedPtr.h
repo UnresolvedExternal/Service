@@ -100,6 +100,8 @@ namespace Service
 
 		y.counter = nullptr;
 		y.pointer = nullptr;
+
+		return *this;
 	}
 
 	template <typename T>
