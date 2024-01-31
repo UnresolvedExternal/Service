@@ -26,6 +26,8 @@ namespace Service
 	};
 }
 
+#if _MSVC_LANG > 202002L
+
 namespace std
 {
 	template <typename T>
@@ -35,6 +37,8 @@ namespace std
 		auto format(const Service::ActiveValue<T>& value, format_context& context) const;
 	};
 }
+
+#endif
 
 namespace Service
 {
@@ -80,6 +84,8 @@ namespace Service
 	}
 }
 
+#if _MSVC_LANG > 202002L
+
 namespace std
 {
 	template <typename T>
@@ -94,3 +100,5 @@ namespace std
 		return formatter<T>::format(*value, context);
 	}
 }
+
+#endif
