@@ -9,7 +9,11 @@ namespace Service
 	public:
 		VarScope();
 		VarScope(T& var);
-		VarScope(T& var, T&& value);
+
+		template <typename E>
+			requires std::is_assignable_v<T&, E>
+		VarScope(T& var, E&& value);
+
 		VarScope(VarScope&& scope);
 		VarScope& operator=(VarScope&& right);
 		void Restore();
@@ -37,10 +41,12 @@ namespace Service
 	}
 
 	template <typename T>
-	VarScope<T>::VarScope(T& var, T&& value) :
+	template <typename E>
+		requires std::is_assignable_v<T&, E>
+	VarScope<T>::VarScope(T& var, E&& value) :
 		VarScope{ var }
 	{
-		var = std::forward<T>(value);
+		var = std::forward<E>(value);
 	}
 
 	template <typename T>
