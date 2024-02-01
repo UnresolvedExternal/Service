@@ -2,7 +2,7 @@
 
 namespace Service
 {
-#define LISTEN_GAME_EVENT(name) extern "C" __declspec(dllexport) void Game_ ## name() { EventManager::GetInstance().Raise(GameEvent::name); }
+#define LISTEN_GAME_EVENT(name) extern "C" __declspec(dllexport) void Game_ ## name() { ::Service::EventManager::GetInstance().Raise(::Service::GameEvent::name); }
 
 	enum class GameEvent : uint32_t
 	{
