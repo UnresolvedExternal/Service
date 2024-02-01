@@ -53,6 +53,10 @@ namespace Service
 		static EventManager& GetInstance();
 
 	private:
+		EventManager() = default;
+		EventManager(EventManager&&) = delete;
+		EventManager& operator=(EventManager&&) = delete;
+
 		static constexpr uint32_t eventsNum = std::countr_zero(static_cast<uint32_t>(GameEvent::All) + 1u) - 1u;
 		std::array<DelegateList<void()>, eventsNum> callbacks;
 		GameEvent currentEvent;
