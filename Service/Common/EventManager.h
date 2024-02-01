@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Service/Common/Delegate.h>
 
 namespace Service
@@ -40,6 +42,7 @@ namespace Service
 	constexpr GameEvent operator+(const GameEvent& x, const GameEvent& y) noexcept;
 	constexpr GameEvent operator-(const GameEvent& x, const GameEvent& y) noexcept;
 	constexpr GameEvent operator!(const GameEvent& x) noexcept;
+	constexpr bool operator&(const GameEvent& x, const GameEvent& y) noexcept;
 
 	class EventManager
 	{
@@ -75,6 +78,11 @@ namespace Service
 	constexpr GameEvent operator!(const GameEvent& x) noexcept
 	{
 		return static_cast<GameEvent>(~static_cast<uint32_t>(x) & static_cast<uint32_t>(GameEvent::All));
+	}
+
+	constexpr bool operator&(const GameEvent& x, const GameEvent& y) noexcept
+	{
+		return static_cast<uint32_t>(x) & static_cast<uint32_t>(y);
 	}
 
 	void EventManager::Subscribe(const GameEvent& events, const Delegate<void()>& callback)

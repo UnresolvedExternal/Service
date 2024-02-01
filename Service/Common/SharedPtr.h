@@ -19,6 +19,8 @@ namespace Service
 		bool operator!=(const SharedPtr& y) const;
 		T& operator*() const;
 		T* operator->() const;
+		explicit operator bool() const;
+
 		T* Get() const;
 
 	private:
@@ -76,9 +78,9 @@ namespace Service
 	SharedPtr<T>& SharedPtr<T>::operator=(const SharedPtr<T>& y)
 	{
 		if (this == &y)
-			return;
+			return *this;
 
-		~SharedPtr();
+		this->~SharedPtr();
 
 		counter = y.counter;
 		pointer = y.pointer;
@@ -105,18 +107,15 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::~SharedPtr<T>()
+	SharedPtr<T>::~SharedPtr()
 	{
-		if (!counter)
-			return;
-
+		if (!counter) return;
 		*counter -= 1;
-
-		if (*counter == 0)
-		{
-			delete counter;
-			delete pointer;
-		}
+		if (counter != 0) return;
+		delete counter;
+		delete pointer;
+		counter = nullptr;
+		pointer = nullptr;
 	}
 
 	template <typename T>
@@ -139,6 +138,12 @@ namespace Service
 
 	template <typename T>
 	T* SharedPtr<T>::operator->() const
+	{
+		return pointer;
+	}
+
+	template <typename T>
+	SharedPtr<T>::operator bool() const
 	{
 		return pointer;
 	}

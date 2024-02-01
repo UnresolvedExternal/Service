@@ -7,25 +7,28 @@
 
 namespace Service
 {
-	struct DelegateBase {};
+	namespace Internals
+	{
+		struct DelegateBase {};
 
-	template <typename T>
-	concept Callable = std::is_convertible_v<T, std::function<T>>;
+		template <typename T>
+		concept Callable = std::is_convertible_v<T, std::function<T>>;
 
-	template <typename T>
-	concept ReturnsVoid = std::is_same_v<typename std::function<T>::result_type, void>;
+		template <typename T>
+		concept ReturnsVoid = std::is_same_v<typename std::function<T>::result_type, void>;
 
-	template <typename T>
-	concept NonDelegate = !std::is_base_of_v<DelegateBase, std::decay_t<T>>;
+		template <typename T>
+		concept NonDelegate = !std::is_base_of_v<DelegateBase, std::decay_t<T>>;
+	}
 
 	// Comparable callable object
-	template <Callable T>
-	class Delegate : public DelegateBase
+	template <Internals::Callable T>
+	class Delegate : public Internals::DelegateBase
 	{
 	public:
 		Delegate();
 
-		template <NonDelegate TFunc>
+		template <Internals::NonDelegate TFunc>
 		Delegate(TFunc&& function);
 
 		Delegate(const Delegate&) = default;
@@ -35,6 +38,7 @@ namespace Service
 
 		bool operator==(const Delegate& right) const;
 		bool operator!=(const Delegate& right) const;
+		explicit operator bool() const;
 
 		template <class ...TArgs>
 		typename std::function<T>::result_type operator()(TArgs&& ...args) const;
@@ -49,7 +53,7 @@ namespace Service
 	// MUST NOT contain dublicates
 	// MUST NOT do recursive calls
 	// Added/removed during the call delegates are not called
-	template <ReturnsVoid T>
+	template <Internals::ReturnsVoid T>
 	class DelegateList
 	{
 	public:
@@ -60,52 +64,59 @@ namespace Service
 		DelegateList& operator+=(Delegate<T>&& delegate);
 		DelegateList& operator-=(const Delegate<T>& delegate);
 
+		void Replace(const Delegate<T>& source, const Delegate<T>& target);
+
 	private:
 		std::vector<Delegate<T>> delegates;
 		std::unordered_set<const std::function<T>*> set;
 	};
 
-	template <Callable T>
-	Delegate<T>::Delegate() :
-		function{ MakeShared<std::function<T>>(nullptr) }
+	template <Internals::Callable T>
+	Delegate<T>::Delegate()
 	{
 
 	}
 
-	template <Callable T>
-	template <NonDelegate TFunc>
+	template <Internals::Callable T>
+	template <Internals::NonDelegate TFunc>
 	Delegate<T>::Delegate(TFunc&& function) :
 		function{ MakeShared<std::function<T>>(std::forward<TFunc>(function)) }
 	{
 
 	}
 
-	template <Callable T>
+	template <Internals::Callable T>
 	bool Delegate<T>::operator==(const Delegate<T>& right) const
 	{
 		return function == right.function;
 	}
 
-	template <Callable T>
+	template <Internals::Callable T>
 	bool Delegate<T>::operator!=(const Delegate<T>& right) const
 	{
 		return function != right.function;
 	}
 
-	template <Callable T>
+	template <Internals::Callable T>
+	Delegate<T>::operator bool() const
+	{
+		return static_cast<bool>(function);
+	}
+
+	template <Internals::Callable T>
 	template <typename ...TArgs>
 	typename std::function<T>::result_type Delegate<T>::operator()(TArgs&& ...args) const
 	{
 		return (*function)(std::forward<TArgs>(args)...);
 	}
 
-	template <Callable T>
+	template <Internals::Callable T>
 	const std::function<T>* Delegate<T>::GetFunction() const
 	{
 		return function.Get();
 	}
 
-	template <ReturnsVoid T>
+	template <Internals::ReturnsVoid T>
 	template <class ...TArgs>
 	void DelegateList<T>::operator()(TArgs&&... args) const
 	{
@@ -116,7 +127,7 @@ namespace Service
 				delegate(args...);
 	}
 
-	template <ReturnsVoid T>
+	template <Internals::ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator+=(const Delegate<T>& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -124,7 +135,7 @@ namespace Service
 		return *this;
 	}
 
-	template <ReturnsVoid T>
+	template <Internals::ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator+=(Delegate<T>&& delegate)
 	{
 		set.insert(delegate.GetFunction());
@@ -132,7 +143,7 @@ namespace Service
 		return *this;
 	}
 
-	template <ReturnsVoid T>
+	template <Internals::ReturnsVoid T>
 	DelegateList<T>& DelegateList<T>::operator-=(const Delegate<T>& delegate)
 	{
 		if (auto it = set.find(delegate.GetFunction()); it != end(set))
@@ -142,5 +153,11 @@ namespace Service
 		}
 
 		return *this;
+	}
+
+	template <Internals::ReturnsVoid T>
+	void DelegateList<T>::Replace(const Delegate<T>& source, const Delegate<T>& target)
+	{
+		*std::find(begin(delegates), end(delegates), source) = target;
 	}
 }
