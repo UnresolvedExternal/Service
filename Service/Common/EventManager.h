@@ -31,10 +31,9 @@ namespace Service
 		Unpause = 1u << 18u,
 		DefineExternals = 1u << 19u,
 		ApplyOptions = 1u << 20u,
-		Detach = 1u << 21u,
 
-		Execute = 1u << 22u,
-		All = (1u << 23u) - 1u,
+		Execute = 1u << 21u,
+		All = (1u << 22u) - 1u,
 		LoadBegin = LoadBegin_NewGame | LoadBegin_SaveGame | LoadBegin_ChangeLevel,
 		LoadEnd = LoadEnd_NewGame | LoadEnd_SaveGame | LoadEnd_ChangeLevel
 	};
