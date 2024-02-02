@@ -39,6 +39,7 @@ namespace std
 namespace Union
 {
 	std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right);
+	std::weak_ordering operator<=>(const StringANSI& left, const char* right);
 }
 
 namespace std
@@ -76,6 +77,15 @@ namespace Union
 	std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right)
 	{
 		const auto diff = left.GetDifference(right, StringBase::Flags::IgnoreCase);
+
+		if (diff < 0) return std::weak_ordering::less;
+		if (diff > 0) return std::weak_ordering::greater;
+		return std::weak_ordering::equivalent;
+	}
+
+	std::weak_ordering operator<=>(const StringANSI& left, const char* right)
+	{
+		const auto diff = str_compare_ignore_case(left, right);
 
 		if (diff < 0) return std::weak_ordering::less;
 		if (diff > 0) return std::weak_ordering::greater;
