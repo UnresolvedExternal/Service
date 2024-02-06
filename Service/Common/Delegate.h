@@ -159,5 +159,7 @@ namespace Service
 	void DelegateList<T>::Replace(const Delegate<T>& source, const Delegate<T>& target)
 	{
 		*std::find(begin(delegates), end(delegates), source) = target;
+		set.erase(source.GetFunction());
+		set.insert(target.GetFunction());
 	}
 }
