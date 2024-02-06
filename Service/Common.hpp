@@ -7,3 +7,5 @@
 #include <Service/Common/VarScope.h>
 #include <Service/Common/EventManager.h>
 #include <Service/Common/GameSub.h>
+#include <Service/Common/OptionValue.h>
+#include <Service/Common/ActiveHook.h>
