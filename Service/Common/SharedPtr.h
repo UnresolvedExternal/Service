@@ -7,27 +7,27 @@ namespace Service
 	class SharedPtr
 	{
 	public:
-		SharedPtr();
-		SharedPtr(std::nullptr_t);
-		SharedPtr(const SharedPtr& y);
-		SharedPtr(SharedPtr&& y);
-		SharedPtr& operator=(const SharedPtr& y);
-		SharedPtr& operator=(SharedPtr&& y);
-		~SharedPtr();
+		inline SharedPtr();
+		inline SharedPtr(std::nullptr_t);
+		inline SharedPtr(const SharedPtr& y);
+		inline SharedPtr(SharedPtr&& y);
+		inline SharedPtr& operator=(const SharedPtr& y);
+		inline SharedPtr& operator=(SharedPtr&& y);
+		inline ~SharedPtr();
 
-		bool operator==(const SharedPtr& y) const;
-		bool operator!=(const SharedPtr& y) const;
-		T& operator*() const;
-		T* operator->() const;
-		explicit operator bool() const;
+		inline bool operator==(const SharedPtr& y) const;
+		inline bool operator!=(const SharedPtr& y) const;
+		inline T& operator*() const;
+		inline T* operator->() const;
+		inline explicit operator bool() const;
 
-		T* Get() const;
+		inline T* Get() const;
 
 	private:
-		SharedPtr(T& data);
+		inline SharedPtr(T& data);
 
 		template <class T, class... TArgs>
-		friend SharedPtr<T> MakeShared(TArgs&&... args);
+		friend inline SharedPtr<T> MakeShared(TArgs&&... args);
 
 		mutable uint32_t* counter;
 		T* pointer;

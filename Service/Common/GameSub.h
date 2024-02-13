@@ -18,20 +18,20 @@ namespace Service
 	class GameSub
 	{
 	public:
-		GameSub();
+		inline GameSub();
 
 		template <Internals::VoidDelegate Lambda>
-		GameSub(const GameEvent& events, Lambda&& lambda);
+		inline GameSub(const GameEvent& events, Lambda&& lambda);
 
 		template <Internals::VoidDelegate Lambda>
-		GameSub(const GameEvent& events, T& option, Lambda&& lambda);
+		inline GameSub(const GameEvent& events, T& option, Lambda&& lambda);
 
-		GameSub(GameSub&& other);
-		GameSub& operator=(GameSub&& other);
-		~GameSub();
+		inline GameSub(GameSub&& other);
+		inline GameSub& operator=(GameSub&& other);
+		inline ~GameSub();
 
 	private:
-		void OnOption();
+		inline void OnOption();
 
 		bool active;
 		GameEvent events;
@@ -44,14 +44,14 @@ namespace Service
 	class GameSub<void>
 	{
 	public:
-		GameSub();
+		inline GameSub();
 
 		template <Internals::VoidDelegate Lambda>
-		GameSub(const GameEvent& events, Lambda&& lambda);
+		inline GameSub(const GameEvent& events, Lambda&& lambda);
 
-		GameSub(GameSub&& other);
-		GameSub& operator=(GameSub&& other);
-		~GameSub();
+		inline GameSub(GameSub&& other);
+		inline GameSub& operator=(GameSub&& other);
+		inline ~GameSub();
 
 	private:
 		GameEvent events;

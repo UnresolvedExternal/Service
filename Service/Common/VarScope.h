@@ -7,18 +7,18 @@ namespace Service
 	struct VarScope
 	{
 	public:
-		VarScope();
-		VarScope(T& var);
+		inline VarScope();
+		inline VarScope(T& var);
 
 		template <typename E>
 			requires std::is_assignable_v<T&, E>
-		VarScope(T& var, E&& value);
+		inline VarScope(T& var, E&& value);
 
-		VarScope(VarScope&& scope);
-		VarScope& operator=(VarScope&& right);
-		VarScope& Restore();
-		void Disable();
-		~VarScope();
+		inline VarScope(VarScope&& scope);
+		inline VarScope& operator=(VarScope&& right);
+		inline VarScope& Restore();
+		inline void Disable();
+		inline ~VarScope();
 
 	private:
 		T* var;

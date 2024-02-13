@@ -9,17 +9,17 @@ namespace GOTHIC_NAMESPACE
 		typedef T*& reference;
 		typedef T** pointer;
 		typedef std::forward_iterator_tag iterator_category;
+		typedef int difference_type;
 
-		ListIterator();
-		ListIterator(TList& list);
-		ListIterator(const ListIterator<T, TList>& right) = default;
-		ListIterator& operator=(const ListIterator<T, TList>& right) = default;
+		inline ListIterator();
+		inline ListIterator(TList& list);
+		inline ListIterator(const ListIterator<T, TList>& right) = default;
+		inline ListIterator& operator=(const ListIterator<T, TList>& right) = default;
 
-		self_type& operator++();
-		self_type operator++(int junk);
-		reference operator*() const;
-		bool operator==(const self_type& right) const;
-		bool operator!=(const self_type& right) const;
+		inline self_type& operator++();
+		inline self_type operator++(int junk);
+		inline reference operator*() const;
+		inline bool operator==(const self_type& right) const;
 
 	private:
 		TList* node;
@@ -35,17 +35,17 @@ namespace GOTHIC_NAMESPACE
 		typedef T** pointer;
 		typedef std::bidirectional_iterator_tag iterator_category;
 
-		TreeIterator();
-		TreeIterator(zCTree<T>& tree);
-		TreeIterator(const TreeIterator&) = default;
-		TreeIterator& operator=(const TreeIterator&) = default;
+		inline TreeIterator();
+		inline TreeIterator(zCTree<T>& tree);
+		inline TreeIterator(const TreeIterator&) = default;
+		inline TreeIterator& operator=(const TreeIterator&) = default;
 
-		self_type& operator++();
-		self_type operator++(int);
-		self_type& operator--();
-		self_type operator--(int);
-		value_type operator*();
-		bool operator==(const self_type& right);
+		inline self_type& operator++();
+		inline self_type operator++(int);
+		inline self_type& operator--();
+		inline self_type operator--(int);
+		inline value_type operator*();
+		inline bool operator==(const self_type& right);
 
 	private:
 		zCTree<T>* node;
@@ -60,15 +60,15 @@ namespace GOTHIC_NAMESPACE
 		typedef oCItem** pointer;
 		typedef std::forward_iterator_tag iterator_category;
 
-		InventoryIterator();
-		InventoryIterator(oCNpcInventory& inventory);
-		InventoryIterator(const InventoryIterator&) = default;
-		InventoryIterator& operator=(const InventoryIterator&) = default;
+		inline InventoryIterator();
+		inline InventoryIterator(oCNpcInventory& inventory);
+		inline InventoryIterator(const InventoryIterator&) = default;
+		inline InventoryIterator& operator=(const InventoryIterator&) = default;
 
-		self_type& operator++();
-		self_type operator++(int);
-		reference operator*() const;
-		bool operator==(const self_type& right) const;
+		inline self_type& operator++();
+		inline self_type operator++(int);
+		inline reference operator*() const;
+		inline bool operator==(const self_type& right) const;
 
 	private:
 		zCListSort<oCItem>* node;
@@ -80,67 +80,73 @@ namespace GOTHIC_NAMESPACE
 	};
 
 	template <typename T>
-	T* begin(zCArray<T>& array);
+	inline T* begin(zCArray<T>& array);
 
 	template <typename T>
-	T* end(zCArray<T>& array);
+	inline T* end(zCArray<T>& array);
 
 	template <typename T>
-	const T* begin(const zCArray<T>& array);
+	inline const T* begin(const zCArray<T>& array);
 
 	template <typename T>
-	const T* end(const zCArray<T>& array);
+	inline const T* end(const zCArray<T>& array);
 
 	template <typename T>
-	T* begin(zCArraySort<T>& array);
+	inline T* begin(zCArraySort<T>& array);
 
 	template <typename T>
-	T* end(zCArraySort<T>& array);
+	inline T* end(zCArraySort<T>& array);
 
 	template <typename T>
-	const T* begin(const zCArraySort<T>& array);
+	inline const T* begin(const zCArraySort<T>& array);
 
 	template <typename T>
-	const T* end(const zCArraySort<T>& array);
+	inline const T* end(const zCArraySort<T>& array);
 
 	template <typename T>
-	ListIterator<T, zCList<T>> begin(zCList<T>& list);
+	inline ListIterator<T, zCList<T>> begin(zCList<T>& list);
 
 	template <typename T>
-	ListIterator<T, zCList<T>> end(zCList<T>& list);
+	inline ListIterator<T, zCList<T>> end(zCList<T>& list);
 
 	template <typename T>
-	ListIterator<T, zCList<T>> begin(zCList<T>* list);
+	inline ListIterator<T, zCList<T>> begin(zCList<T>* list);
 
 	template <typename T>
-	ListIterator<T, zCList<T>> end(zCList<T>* list);
+	inline ListIterator<T, zCList<T>> end(zCList<T>* list);
 
 	template <typename T>
-	ListIterator<T, zCListSort<T>> begin(zCListSort<T>& list);
+	inline ListIterator<T, zCListSort<T>> begin(zCListSort<T>& list);
 
 	template <typename T>
-	ListIterator<T, zCListSort<T>> end(zCListSort<T>& list);
+	inline ListIterator<T, zCListSort<T>> end(zCListSort<T>& list);
 
 	template <typename T>
-	ListIterator<T, zCListSort<T>> begin(zCListSort<T>* list);
+	inline ListIterator<T, zCListSort<T>> begin(zCListSort<T>* list);
 
 	template <typename T>
-	ListIterator<T, zCListSort<T>> end(zCListSort<T>* list);
+	inline ListIterator<T, zCListSort<T>> end(zCListSort<T>* list);
 
 	template <typename T>
-	TreeIterator<T> begin(zCTree<T>& root);
+	inline TreeIterator<T> begin(zCTree<T>& root);
 
 	template <typename T>
-	TreeIterator<T> end(zCTree<T>& root);
+	inline TreeIterator<T> end(zCTree<T>& root);
 
 	template <typename T>
-	TreeIterator<T> begin(zCTree<T>* root);
+	inline TreeIterator<T> begin(zCTree<T>* root);
 
 	template <typename T>
-	TreeIterator<T> end(zCTree<T>* root);
+	inline TreeIterator<T> end(zCTree<T>* root);
 
-	InventoryIterator begin(oCNpcInventory& inv);
-	InventoryIterator end(oCNpcInventory& inv);
+	inline InventoryIterator begin(oCNpcInventory& inv);
+	inline InventoryIterator end(oCNpcInventory& inv);
+
+	inline const char* begin(const zSTRING& text);
+	inline const char* end(const zSTRING& text);
+
+	inline char* begin(zSTRING& text);
+	inline char* end(zSTRING& text);
 
 #pragma region Implementation
 
@@ -479,6 +485,26 @@ namespace GOTHIC_NAMESPACE
 	InventoryIterator end(oCNpcInventory& inv)
 	{
 		return InventoryIterator{};
+	}
+
+	const char* begin(const zSTRING& text)
+	{
+		return text.IsEmpty() ? nullptr : text.ToChar();
+	}
+
+	const char* end(const zSTRING& text)
+	{
+		return text.IsEmpty() ? nullptr : text.ToChar() + text.Length();
+	}
+
+	char* begin(zSTRING& text)
+	{
+		return text.IsEmpty() ? nullptr : text.ToChar();
+	}
+
+	char* end(zSTRING& text)
+	{
+		return text.IsEmpty() ? nullptr : text.ToChar() + text.Length();
 	}
 
 #pragma endregion

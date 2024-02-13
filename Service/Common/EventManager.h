@@ -16,7 +16,7 @@ namespace Service
 		PreLoop = 1u << 3u,
 		Loop = 1u << 4u,
 		PostLoop = 1u << 5u,
-		MenuLoop = 1u << 6u,
+		MenuLoop = 1u << 6u,	
 		SaveBegin = 1u << 7u,
 		SaveEnd = 1u << 8u,
 		LoadBegin_NewGame = 1u << 9u,
@@ -38,24 +38,24 @@ namespace Service
 		LoadEnd = LoadEnd_NewGame | LoadEnd_SaveGame | LoadEnd_ChangeLevel
 	};
 
-	constexpr GameEvent operator+(const GameEvent& x, const GameEvent& y) noexcept;
-	constexpr GameEvent operator-(const GameEvent& x, const GameEvent& y) noexcept;
-	constexpr GameEvent operator!(const GameEvent& x) noexcept;
-	constexpr bool operator&(const GameEvent& x, const GameEvent& y) noexcept;
+	inline constexpr GameEvent operator+(const GameEvent& x, const GameEvent& y) noexcept;
+	inline constexpr GameEvent operator-(const GameEvent& x, const GameEvent& y) noexcept;
+	inline constexpr GameEvent operator!(const GameEvent& x) noexcept;
+	inline constexpr bool operator&(const GameEvent& x, const GameEvent& y) noexcept;
 
 	class EventManager
 	{
 	public:
-		void Subscribe(const GameEvent& events, const Delegate<void()>& callback);
-		void Unsubscribe(const GameEvent& events, const Delegate<void()>& callback);
+		inline void Subscribe(const GameEvent& events, const Delegate<void()>& callback);
+		inline void Unsubscribe(const GameEvent& events, const Delegate<void()>& callback);
 	
-		void Raise(const GameEvent& singleEvent);
-		const GameEvent& GetCurrentEvent() const;
+		inline void Raise(const GameEvent& singleEvent);
+		inline const GameEvent& GetCurrentEvent() const;
 
-		static EventManager& GetInstance();
+		inline static EventManager& GetInstance();
 
 	private:
-		EventManager() = default;
+		inline EventManager() = default;
 		EventManager(EventManager&&) = delete;
 		EventManager& operator=(EventManager&&) = delete;
 
@@ -88,7 +88,7 @@ namespace Service
 	{
 		uint32_t flags = static_cast<uint32_t>(events);
 
-		for (uint32_t i = 0; flags != 0; )
+		for (uint32_t i = 0; flags != 0; i++)
 		{
 			const uint32_t skip = std::countr_zero(flags);
 			i += skip;
@@ -101,7 +101,7 @@ namespace Service
 	{
 		uint32_t flags = static_cast<uint32_t>(events);
 
-		for (uint32_t i = 0; flags != 0; )
+		for (uint32_t i = 0; flags != 0; i++)
 		{
 			const uint32_t skip = std::countr_zero(flags);
 			i += skip;

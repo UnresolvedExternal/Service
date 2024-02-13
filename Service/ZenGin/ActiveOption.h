@@ -15,22 +15,22 @@ namespace GOTHIC_NAMESPACE
 		bool KeepApartIfHasTrivia;
 
 	protected:
-		ActiveOptionBase(std::string_view sectionName, std::string_view entryName);
-		ActiveOptionBase(ActiveOptionBase&) = delete;
-		ActiveOptionBase& operator=(const ActiveOptionBase&) = delete;
-		~ActiveOptionBase();
+		inline ActiveOptionBase(std::string_view sectionName, std::string_view entryName);
+		inline ActiveOptionBase(ActiveOptionBase&) = delete;
+		inline ActiveOptionBase& operator=(const ActiveOptionBase&) = delete;
+		inline ~ActiveOptionBase();
 
-		bool Create();
-		virtual void Init(bool createdNew) = 0;
-		virtual void HandleNewValue() = 0;
+		inline bool Create();
+		inline virtual void Init(bool createdNew) = 0;
+		inline virtual void HandleNewValue() = 0;
 
 		zCOptionEntry* entry;
 		const std::string sectionName;
 		const std::string entryName;
 
 	private:
-		static int OnOptionChange(zCOptionEntry& e);
-		static std::string ToUpper(std::string_view text);
+		inline static int OnOptionChange(zCOptionEntry& e);
+		inline static std::string ToUpper(std::string_view text);
 
 		static std::vector<ActiveOptionBase*> activeOptions;
 	};
@@ -39,24 +39,24 @@ namespace GOTHIC_NAMESPACE
 	class ActiveOption : public ActiveOptionBase
 	{
 	public:
-		ActiveOption(std::string_view sectionName, std::string_view entryName, T&& defaultValue);
-		ActiveOption(const ActiveOption&) = delete;
-		ActiveOption& operator=(const ActiveOption&) = delete;
+		inline ActiveOption(std::string_view sectionName, std::string_view entryName, T&& defaultValue);
+		inline ActiveOption(const ActiveOption&) = delete;
+		inline ActiveOption& operator=(const ActiveOption&) = delete;
 
-		operator T() const;
-		const T& operator*() const;
-		const T* operator->() const;
-		ActiveOption& operator=(T&& newValue);
+		inline operator T() const;
+		inline const T& operator*() const;
+		inline const T* operator->() const;
+		inline ActiveOption& operator=(const T& newValue);
 
 		template <typename E>
-		const auto& operator[](const E& index) const;
+		inline const auto& operator[](const E& index) const;
 
 		const T& GetDefaultValue() const;
-		void SetDefaultValue(T&& newDefaultValue);
+		inline void SetDefaultValue(T&& newDefaultValue);
 
 	protected:
-		virtual void Init(bool createdNew) override;
-		virtual void HandleNewValue() override;
+		inline virtual void Init(bool createdNew) override;
+		inline virtual void HandleNewValue() override;
 
 		OptionValue<T> value;
 		OptionValue<T> defaultValue;
@@ -100,8 +100,9 @@ namespace GOTHIC_NAMESPACE
 		const bool keepApart = KeepApartIfHasTrivia && hasTrivia;
 		const zCOptionEntry* const lastEntry = section->entryList.IsEmpty() ? nullptr : section->entryList[section->entryList.GetNum() - 1];
 
-		if (!lastEntry || !lastEntry->varName.IsEmpty())
-			section->entryList.InsertEnd(new zCOptionEntry{ "", "\r\n" });
+		if (keepApart)
+			if (!lastEntry || !lastEntry->varName.IsEmpty())
+				section->entryList.InsertEnd(new zCOptionEntry{ "", "\r\n" });
 
 		for (const std::string& trivia : StartTrivia)
 		{
@@ -168,19 +169,21 @@ namespace GOTHIC_NAMESPACE
 	}
 
 	template <typename T>
-	ActiveOption<T>& ActiveOption<T>::operator=(T&& newValue)
+	ActiveOption<T>& ActiveOption<T>::operator=(const T& newValue)
 	{
-		if (value == newValue)
+		OptionValue<T> newOptionValue{ newValue };
+
+		if (value == newOptionValue)
 			return *this;
 
-		value = std::forward<T>(newValue);
-
 		std::ostringstream out;
-		out << value;
+		out << newOptionValue;
 		entry->varValue = entry->varValueTemp = out.str().c_str();
 
 		for (auto* callback : entry->ccbList)
 			callback(*entry);
+
+		return *this;
 	}
 
 	template <typename T>

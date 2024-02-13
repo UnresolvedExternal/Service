@@ -19,6 +19,9 @@ namespace Service
 
 		template <typename T>
 		concept NonDelegate = !std::is_base_of_v<DelegateBase, std::decay_t<T>>;
+
+		template <typename T, typename... TArgs>
+		concept SameAsAny = (std::same_as<T, TArgs> || ...);
 	}
 
 	// Comparable callable object
@@ -26,24 +29,24 @@ namespace Service
 	class Delegate : public Internals::DelegateBase
 	{
 	public:
-		Delegate();
+		inline Delegate();
 
 		template <Internals::NonDelegate TFunc>
-		Delegate(TFunc&& function);
+		inline Delegate(TFunc&& function);
 
-		Delegate(const Delegate&) = default;
-		Delegate(Delegate&&) = default;
-		Delegate& operator=(const Delegate&) = default;
-		Delegate& operator=(Delegate&& y) = default;
+		inline Delegate(const Delegate&) = default;
+		inline Delegate(Delegate&&) = default;
+		inline Delegate& operator=(const Delegate&) = default;
+		inline Delegate& operator=(Delegate&& y) = default;
 
-		bool operator==(const Delegate& right) const;
-		bool operator!=(const Delegate& right) const;
-		explicit operator bool() const;
+		inline bool operator==(const Delegate& right) const;
+		inline bool operator!=(const Delegate& right) const;
+		inline explicit operator bool() const;
 
 		template <class ...TArgs>
-		typename std::function<T>::result_type operator()(TArgs&& ...args) const;
+		inline typename std::function<T>::result_type operator()(TArgs&& ...args) const;
 
-		const std::function<T>* GetFunction() const;
+		inline const std::function<T>* GetFunction() const;
 
 	private:
 		SharedPtr<std::function<T>> function;
@@ -58,13 +61,13 @@ namespace Service
 	{
 	public:
 		template <class ...TArgs>
-		void operator()(TArgs&& ... args) const;
+		inline void operator()(TArgs&& ... args) const;
 
-		DelegateList& operator+=(const Delegate<T>& delegate);
-		DelegateList& operator+=(Delegate<T>&& delegate);
-		DelegateList& operator-=(const Delegate<T>& delegate);
+		inline DelegateList& operator+=(const Delegate<T>& delegate);
+		inline DelegateList& operator+=(Delegate<T>&& delegate);
+		inline DelegateList& operator-=(const Delegate<T>& delegate);
 
-		void Replace(const Delegate<T>& source, const Delegate<T>& target);
+		inline void Replace(const Delegate<T>& source, const Delegate<T>& target);
 
 	private:
 		std::vector<Delegate<T>> delegates;

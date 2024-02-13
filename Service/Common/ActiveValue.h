@@ -9,15 +9,15 @@ namespace Service
 	class ActiveValue
 	{
 	public:
-		ActiveValue();
-		ActiveValue(T&& value);
-		ActiveValue(ActiveValue&& other);
-		ActiveValue& operator=(ActiveValue&& other) = default;
-		ActiveValue& operator=(T&& value);
+		inline ActiveValue();
+		inline ActiveValue(const T& value);
+		inline ActiveValue(ActiveValue&& other);
+		inline ActiveValue& operator=(ActiveValue&& other) = default;
+		inline ActiveValue& operator=(const T& value);
 
-		operator const T& () const;
-		const T& operator*() const;
-		const T* operator->() const;
+		inline operator const T& () const;
+		inline const T& operator*() const;
+		inline const T* operator->() const;
 
 		DelegateList<void()> OnChange;
 
@@ -33,8 +33,8 @@ namespace std
 	template <typename T>
 	struct formatter<Service::ActiveValue<T>> : private formatter<T>
 	{
-		constexpr auto parse(format_parse_context& context);
-		auto format(const Service::ActiveValue<T>& value, format_context& context) const;
+		inline constexpr auto parse(format_parse_context& context);
+		inline auto format(const Service::ActiveValue<T>& value, format_context& context) const;
 	};
 }
 
@@ -50,17 +50,17 @@ namespace Service
 	}
 
 	template <typename T> 
-	ActiveValue<T>::ActiveValue(T&& value) :
-		value{ std::forward<T>(value) }
+	ActiveValue<T>::ActiveValue(const T& value) :
+		value{ value }
 	{
 	
 	}
 
 	template <typename T>
-	ActiveValue<T>& ActiveValue<T>::operator=(T&& value)
+	ActiveValue<T>& ActiveValue<T>::operator=(const T& value)
 	{
 		const bool changed = this->value != value;
-		this->value = std::forward<T>(value);
+		this->value = value;
 		if (changed) OnChange();
 		return *this;
 	}

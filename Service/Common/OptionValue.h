@@ -6,24 +6,24 @@ namespace Service
 	class OptionValue
 	{
 	public:
-		OptionValue(const T& value);
-		OptionValue(T&& value = T{});
-		OptionValue(const OptionValue& other) = default;
-		OptionValue(OptionValue&& other) = default;
-		OptionValue& operator=(const OptionValue& other) = default;
-		OptionValue& operator=(OptionValue&&) = default;
+		inline OptionValue(const T& value);
+		inline OptionValue(T&& value = T{});
+		inline OptionValue(const OptionValue& other) = default;
+		inline OptionValue(OptionValue&& other) = default;
+		inline OptionValue& operator=(const OptionValue& other) = default;
+		inline OptionValue& operator=(OptionValue&&) = default;
 
 		template <typename E>
-		const auto& operator[](const E& index) const;
+		inline const auto& operator[](const E& index) const;
 
 		template <typename E>
-		auto& operator[](const E& index);
+		inline auto& operator[](const E& index);
 
-		explicit operator T() const;
-		const T& operator*() const;
-		T& operator*();
-		const T* operator->() const;
-		T* operator->();
+		inline explicit operator T() const;
+		inline const T& operator*() const;
+		inline T& operator*();
+		inline const T* operator->() const;
+		inline T* operator->();
 
 	private:
 		T value;

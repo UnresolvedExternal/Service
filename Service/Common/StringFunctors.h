@@ -10,19 +10,19 @@ namespace std
 	template <>
 	struct hash<StringANSI> : private hash<string_view>
 	{
-		size_t operator()(const StringANSI& x) const;
+		inline size_t operator()(const StringANSI& x) const;
 	};
 
 	template <>
 	struct equal_to<StringANSI>
 	{
-		bool operator()(const StringANSI& x, const StringANSI& y) const;
+		inline bool operator()(const StringANSI& x, const StringANSI& y) const;
 	};
 
 	template <>
 	struct less<StringANSI>
 	{
-		bool operator()(const StringANSI& x, const StringANSI& y) const;
+		inline bool operator()(const StringANSI& x, const StringANSI& y) const;
 	};
 
 #if __cplusplus > 202002L
@@ -30,7 +30,7 @@ namespace std
 	template <>
 	struct formatter<StringANSI> : public formatter<string_view>
 	{
-		auto format(const StringANSI& text, format_context& context) const;
+		inline auto format(const StringANSI& text, format_context& context) const;
 	};
 
 #endif
@@ -38,8 +38,8 @@ namespace std
 
 namespace Union
 {
-	std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right);
-	std::weak_ordering operator<=>(const StringANSI& left, const char* right);
+	inline std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right);
+	inline std::weak_ordering operator<=>(const StringANSI& left, const char* right);
 }
 
 namespace std
