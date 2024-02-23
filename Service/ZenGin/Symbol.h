@@ -1,7 +1,7 @@
 namespace GOTHIC_NAMESPACE
 {
 	template <typename T>
-	concept ParserType = ::Service::Internals::SameAsAny<T, int, bool, unsigned, float, zSTRING> || std::is_pointer_v<T>;
+	concept ParserType = ::Service::Internals::SameAsAny<T, void, int, bool, unsigned, float, zSTRING> || std::is_pointer_v<T>;
 
 	enum class SymbolType
 	{

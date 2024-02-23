@@ -32,8 +32,10 @@ namespace GOTHIC_NAMESPACE
 
 	namespace Internals
 	{
+		inline void PopArguments(zCParser* parser);
+
 		template <ParserType T>
-		inline void PopArguments(zCParser* parser, T& argument);
+		inline void PopArgument(zCParser* parser, T& argument);
 
 		template <ParserType THead, ParserType... TTail>
 		inline void PopArguments(zCParser* parser, THead& head, TTail&... tail);
@@ -41,17 +43,15 @@ namespace GOTHIC_NAMESPACE
 		inline void PushArguments(zCParser* parser, int junk);
 
 		template <ParserType T>
-		inline void PushArguments(zCParser* parser, const T& arg, int useSymbolIndex);
+		inline void PushArgument(zCParser* parser, int useSymbolIndex, const T& arg);
 
 		template <ParserType THead, ParserType... TTail>
-		inline void PushArguments(zCParser* parser, const THead& head, const TTail&... tail, int startSymbolIndex);
+		inline void PushArguments(zCParser* parser, int startSymbolIndex, const THead& head, const TTail&... tail);
 
-		template <typename T>
-			requires ParserType<T> || ::Service::Internals::SameAsAny<T, void>
+		template <ParserType T>
 		inline constexpr int GetParserType();
 
-		template <typename TReturn, ParserType... TArgs>
-			requires ParserType<TReturn> || ::Service::Internals::SameAsAny<TReturn, void>
+		template <ParserType TReturn, ParserType... TArgs>
 		inline void RegisterExternalFunc(zCParser* parser, const char* name, AnyPtr function);
 	}
 
@@ -78,7 +78,7 @@ namespace GOTHIC_NAMESPACE
 	template <ParserType T>
 	void SetReturn(zCParser* parser, const T& value)
 	{
-		Internals::PushArguments(parser, value, -1);
+		Internals::PushArguments(parser, -1, value);
 	}
 
 	template <ParserType TReturn, ParserType... TArgs>
@@ -91,7 +91,7 @@ namespace GOTHIC_NAMESPACE
 	TReturn Call(zCParser* parser, int function, const TArgs&... args)
 	{
 		Symbol symbol{ parser, function };
-		Internals::PushArguments<TArgs...>(parser, args..., symbol.GetIndex() + 1);
+		Internals::PushArguments(parser, symbol.GetIndex() + 1, args...);
 
 		if (symbol.Classify() == SymbolType::ExternalFunc)
 			reinterpret_cast<int(*)()>(symbol.AsArray<void*>()[0])();
@@ -110,8 +110,13 @@ namespace GOTHIC_NAMESPACE
 
 	namespace Internals
 	{
+		inline void PopArguments(zCParser* parser)
+		{
+
+		}
+
 		template <ParserType T>
-		void PopArguments(zCParser* parser, T& arg)
+		void PopArgument(zCParser* parser, T& arg)
 		{
 			if constexpr (::Service::Internals::SameAsAny<T, int, bool, unsigned>)
 			{
@@ -134,7 +139,7 @@ namespace GOTHIC_NAMESPACE
 		void PopArguments(zCParser* parser, THead& head, TTail&... tail)
 		{
 			PopArguments(parser, tail...);
-			PopArguments(parser, head);
+			PopArgument(parser, head);
 		}
 
 		void PushArguments(zCParser* parser, int junk)
@@ -143,7 +148,7 @@ namespace GOTHIC_NAMESPACE
 		}
 
 		template <ParserType T>
-		void PushArguments(zCParser* parser, const T& arg, int useSymbolIndex)
+		void PushArgument(zCParser* parser, int useSymbolIndex, const T& arg)
 		{
 			if constexpr (::Service::Internals::SameAsAny<T, int, bool, unsigned>)
 				parser->SetReturn(static_cast<int>(arg));
@@ -161,15 +166,14 @@ namespace GOTHIC_NAMESPACE
 		}
 		
 		template <ParserType THead, ParserType... TTail>
-		void PushArguments(zCParser* parser, const THead& head, const TTail&... tail, int startSymbolIndex)
+		void PushArguments(zCParser* parser, int startSymbolIndex, const THead& head, const TTail&... tail)
 		{
-			PushArguments(parser, head, startSymbolIndex);
+			PushArgument(parser, startSymbolIndex, head);
 			startSymbolIndex = startSymbolIndex == -1 ? startSymbolIndex : (startSymbolIndex + 1);
-			PushArguments(parser, tail..., startSymbolIndex);
+			PushArguments(parser, startSymbolIndex, tail...);
 		}
 
-		template <typename T>
-			requires ParserType<T> || ::Service::Internals::SameAsAny<T, void>
+		template <ParserType T>
 		constexpr int GetParserType()
 		{
 			if constexpr (::Service::Internals::SameAsAny<T, int, bool>)
@@ -186,8 +190,7 @@ namespace GOTHIC_NAMESPACE
 				return zPAR_TYPE_VOID;
 		}
 
-		template <typename TReturn, ParserType... TArgs>
-			requires ParserType<TReturn> || ::Service::Internals::SameAsAny<TReturn, void>
+		template <ParserType TReturn, ParserType... TArgs>
 		void RegisterExternalFunc(zCParser* parser, const char* name, AnyPtr function)
 		{
 			parser->DefineExternal(name, static_cast<int(*)()>(static_cast<void*>(function)), GetParserType<TReturn>(), GetParserType<TArgs>()..., zPAR_TYPE_VOID);
