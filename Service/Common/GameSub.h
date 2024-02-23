@@ -33,7 +33,7 @@ namespace Service
 	private:
 		inline void OnOption();
 
-		bool active;
+		bool subscribed;
 		GameEvent events;
 		T* option;
 		Delegate<void()> callback;
@@ -44,14 +44,14 @@ namespace Service
 	class GameSub<void>
 	{
 	public:
-		inline GameSub();
+		inline GameSub() noexcept;
 
 		template <Internals::VoidDelegate Lambda>
-		inline GameSub(const GameEvent& events, Lambda&& lambda);
+		inline GameSub(const GameEvent& events, Lambda&& lambda) noexcept;
 
-		inline GameSub(GameSub&& other);
-		inline GameSub& operator=(GameSub&& other);
-		inline ~GameSub();
+		inline GameSub(GameSub&& other) noexcept;
+		inline GameSub& operator=(GameSub&& other) noexcept;
+		inline ~GameSub() noexcept;
 
 	private:
 		GameEvent events;
@@ -60,7 +60,7 @@ namespace Service
 
 	template <typename T>
 	GameSub<T>::GameSub() :
-		active{},
+		subscribed{},
 		events{},
 		option{}
 	{
@@ -77,14 +77,14 @@ namespace Service
 		if (events & GameEvent::Execute)
 			callback();
 
-		active = this->events != GameEvent::NoEvent;
-		EventManager::GetInstance().Subscribe(this->events, callback);
+		subscribed = this->events - GameEvent::Destruct != GameEvent::NoEvent;
+		EventManager::GetInstance().Subscribe(this->events - GameEvent::Destruct, callback);
 	}
 
 	template <typename T>
 	template <Internals::VoidDelegate Lambda>
 	GameSub<T>::GameSub(const GameEvent& events, T& option, Lambda&& lambda) :
-		active{},
+		subscribed{},
 		events{ events - GameEvent::Execute },
 		option{ &option },
 		callback{ std::forward<Lambda>(lambda) }
@@ -93,23 +93,23 @@ namespace Service
 			if (static_cast<bool>(option))
 				callback();
 
-		if (this->events == GameEvent::NoEvent)
+		if (this->events - GameEvent::Destruct == GameEvent::NoEvent)
 			return;
 
-		active = static_cast<bool>(option);
-		EventManager::GetInstance().Subscribe(active ? this->events : GameEvent::NoEvent, callback);
+		subscribed = static_cast<bool>(option);
+		EventManager::GetInstance().Subscribe(subscribed ? this->events : GameEvent::NoEvent, callback);
 		onOption = std::bind(&GameSub::OnOption, this);
 		option.OnChange += onOption;
 	}
 
 	template <typename T>
 	GameSub<T>::GameSub(GameSub&& other) :
-		active{ other.active },
+		subscribed{ other.subscribed },
 		events{ other.events },
 		option{ other.option },
 		callback{ std::move(other.callback) }
 	{
-		other.active = {};
+		other.subscribed = {};
 		other.events = {};
 
 		if (!other.onOption)
@@ -123,7 +123,7 @@ namespace Service
 	template <typename T>
 	GameSub<T>& GameSub<T>::operator=(GameSub<T>&& other)
 	{
-		if (active)
+		if (subscribed)
 			EventManager::GetInstance().Unsubscribe(events, callback);
 
 		if (onOption)
@@ -138,12 +138,12 @@ namespace Service
 			other.onOption = {};
 		}
 
-		active = other.active;
+		subscribed = other.subscribed;
 		events = other.events;
 		option = other.option;
 		callback = std::move(other.callback);
 
-		other.active = {};
+		other.subscribed = {};
 		other.events = {};
 		return *this;
 	}
@@ -151,61 +151,68 @@ namespace Service
 	template <typename T>
 	GameSub<T>::~GameSub()
 	{
-		if (active) EventManager::GetInstance().Unsubscribe(events, callback);
+		if (subscribed) EventManager::GetInstance().Unsubscribe(events, callback);
 		if (onOption) option->OnChange -= onOption;
+		
+		if (events & GameEvent::Destruct)
+			if (!option || static_cast<bool>(*option))
+				callback();
 	}
 
 	template <typename T>
 	void GameSub<T>::OnOption()
 	{
-		const bool changed = active != static_cast<bool>(*option);
+		const bool changed = subscribed != static_cast<bool>(*option);
 		if (!changed) return;
-		active = !active;
+		subscribed = !subscribed;
 
-		if (active) EventManager::GetInstance().Subscribe(events, callback);
+		if (subscribed) EventManager::GetInstance().Subscribe(events, callback);
 		else EventManager::GetInstance().Unsubscribe(events, callback);
 	}
 
-	GameSub<void>::GameSub() :
+	GameSub<void>::GameSub() noexcept :
 		events{}
 	{
 
 	}
 
 	template <Internals::VoidDelegate Lambda>
-	GameSub<void>::GameSub(const GameEvent& events, Lambda&& lambda) :
+	GameSub<void>::GameSub(const GameEvent& events, Lambda&& lambda) noexcept :
 		events{ events - GameEvent::Execute },
 		callback{ std::forward<Lambda>(lambda) }
 	{
 		if (events & GameEvent::Execute)
 			callback();
 
-		if (this->events == GameEvent::NoEvent)
+		if (this->events - GameEvent::Destruct == GameEvent::NoEvent)
 			return;
 
 		EventManager::GetInstance().Subscribe(this->events, callback);
 	}
 
-	GameSub<void>::GameSub(GameSub&& other) :
+	GameSub<void>::GameSub(GameSub&& other) noexcept :
 		events{ other.events },
 		callback{ std::move(other.callback) }
 	{
 		other.events = {};
 	}
 
-	GameSub<void>& GameSub<void>::operator=(GameSub&& other)
+	GameSub<void>& GameSub<void>::operator=(GameSub&& other) noexcept
 	{
-		if (events != GameEvent::NoEvent)
-			EventManager::GetInstance().Unsubscribe(events, callback);
+		if (events - GameEvent::Destruct != GameEvent::NoEvent)
+			EventManager::GetInstance().Unsubscribe(events - GameEvent::Destruct, callback);
 		
 		events = other.events;
 		callback = std::move(other.callback);
 		return *this;
 	}
 
-	GameSub<void>::~GameSub()
+	GameSub<void>::~GameSub() noexcept
 	{
-		if (events == GameEvent::NoEvent) return;
-		EventManager::GetInstance().Unsubscribe(events, callback);
+		if (events - GameEvent::Destruct != GameEvent::NoEvent)
+			EventManager::GetInstance().Unsubscribe(events - GameEvent::Destruct, callback);
+
+		if (events & GameEvent::Destruct)
+			callback();
 	}
 }

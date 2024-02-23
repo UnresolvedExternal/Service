@@ -7,12 +7,12 @@ namespace Service
 	class SharedPtr
 	{
 	public:
-		inline SharedPtr();
-		inline SharedPtr(std::nullptr_t);
-		inline SharedPtr(const SharedPtr& y);
-		inline SharedPtr(SharedPtr&& y);
-		inline SharedPtr& operator=(const SharedPtr& y);
-		inline SharedPtr& operator=(SharedPtr&& y);
+		inline SharedPtr() noexcept;
+		inline SharedPtr(std::nullptr_t) noexcept;
+		inline SharedPtr(const SharedPtr& y) noexcept;
+		inline SharedPtr(SharedPtr&& y) noexcept;
+		inline SharedPtr& operator=(const SharedPtr& y) noexcept;
+		inline SharedPtr& operator=(SharedPtr&& y) noexcept;
 		inline ~SharedPtr();
 
 		inline bool operator==(const SharedPtr& y) const;
@@ -42,22 +42,22 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr() :
-		counter{ nullptr },
-		pointer{ nullptr }
+	SharedPtr<T>::SharedPtr() noexcept :
+		counter{},
+		pointer{}
 	{
 
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr(std::nullptr_t) :
+	SharedPtr<T>::SharedPtr(std::nullptr_t) noexcept :
 		SharedPtr{}
 	{
 
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr(const SharedPtr<T>& y) :
+	SharedPtr<T>::SharedPtr(const SharedPtr<T>& y) noexcept :
 		counter{ y.counter },
 		pointer{ y.pointer }
 	{
@@ -66,7 +66,7 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>::SharedPtr(SharedPtr<T>&& y) :
+	SharedPtr<T>::SharedPtr(SharedPtr<T>&& y) noexcept :
 		counter{ y.counter },
 		pointer{ y.pointer }
 	{
@@ -75,7 +75,7 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>& SharedPtr<T>::operator=(const SharedPtr<T>& y)
+	SharedPtr<T>& SharedPtr<T>::operator=(const SharedPtr<T>& y) noexcept
 	{
 		if (this == &y)
 			return *this;
@@ -92,7 +92,7 @@ namespace Service
 	}
 
 	template <typename T>
-	SharedPtr<T>& SharedPtr<T>::operator=(SharedPtr&& y)
+	SharedPtr<T>& SharedPtr<T>::operator=(SharedPtr&& y) noexcept
 	{
 		if (this == &y)
 			return *this;
