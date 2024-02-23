@@ -19,7 +19,7 @@
 	option \
 }
 
-#define HOOK_DEFAULT_OVERLOAD_BINDED(className, methodName, suffix, type, option) BindedHook Ivk_ ## className ## _ ## methodName ## _ ## suffix { \
+#define HOOK_DEFAULT_BINDED_OVERLOAD(className, methodName, suffix, type, option) BindedHook Ivk_ ## className ## _ ## methodName ## _ ## suffix { \
 	ENGINE_ADDRESS_OF_OVERLOAD(type, &className::methodName), \
 	static_cast<type>(&className::methodName ## _Union), \
 	option \
@@ -52,7 +52,7 @@ concept CompatibleHook = requires(TFrom a, TTo b) { b = a; };
 	}; \
 	ret className ## _ ## methodName ## _ ## suffix :: operator() args
 
-#define HOOK_OVERLOAD_BINDED(className, methodName, suffix, ret, args, option) \
+#define HOOK_BINDED_OVERLOAD(className, methodName, suffix, ret, args, option) \
 	struct className ## _ ## methodName ## _ ## suffix : className { ret operator() args; }; \
 	static_assert(CompatibleHook<ret (className::*) args, decltype(&className ## _ ## methodName ## _ ## suffix :: operator())>, "Incompatible signatures"); \
 	BindedHook Ivk_ ## className ## _ ## methodName ## _ ## suffix { \
