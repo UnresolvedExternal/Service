@@ -90,6 +90,12 @@ namespace GOTHIC_NAMESPACE
 
 	bool ActiveOptionBase::Create()
 	{
+		GameSub clearTrivia(GameEvent::Destruct, [this]
+		{
+			StartTrivia.clear();
+			EndTrivia.clear();
+		});
+
 		zCOptionSection* const section = zoptions->GetSectionByName(sectionName.c_str(), true);
 		entry = zoptions->GetEntryByName(section, entryName.c_str(), false);
 		

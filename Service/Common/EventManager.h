@@ -33,7 +33,9 @@ namespace Service
 		ApplyOptions = 1u << 20u,
 
 		Execute = 1u << 21u,
-		All = (1u << 22u) - 1u,
+		Destruct = 1u << 22u,
+
+		All = (1u << 23u) - 1u,
 		LoadBegin = LoadBegin_NewGame | LoadBegin_SaveGame | LoadBegin_ChangeLevel,
 		LoadEnd = LoadEnd_NewGame | LoadEnd_SaveGame | LoadEnd_ChangeLevel
 	};
@@ -59,7 +61,7 @@ namespace Service
 		EventManager(EventManager&&) = delete;
 		EventManager& operator=(EventManager&&) = delete;
 
-		static constexpr uint32_t eventsNum = std::countr_zero(static_cast<uint32_t>(GameEvent::All) + 1u) - 1u;
+		static constexpr uint32_t eventsNum = std::countr_zero(static_cast<uint32_t>(GameEvent::All) + 1u) - 2u;
 		std::array<DelegateList<void()>, eventsNum> callbacks;
 		GameEvent currentEvent;
 	};
