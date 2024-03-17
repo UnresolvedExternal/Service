@@ -187,7 +187,7 @@ namespace Service
 		if (this->events - GameEvent::Destruct == GameEvent::NoEvent)
 			return;
 
-		EventManager::GetInstance().Subscribe(this->events, callback);
+		EventManager::GetInstance().Subscribe(this->events - GameEvent::Destruct, callback);
 	}
 
 	GameSub<void>::GameSub(GameSub&& other) noexcept :
@@ -204,6 +204,7 @@ namespace Service
 		
 		events = other.events;
 		callback = std::move(other.callback);
+		other.events = {};
 		return *this;
 	}
 

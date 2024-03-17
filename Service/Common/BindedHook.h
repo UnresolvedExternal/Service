@@ -7,8 +7,8 @@ namespace Service
 	class BindedHook
 	{
 	public:
-		inline BindedHook(::Union::AnyPtr from, TFunction to, ::Union::HookType hookType = ::Union::HookType::Hook_Auto);
-		inline BindedHook(::Union::AnyPtr from, TFunction to, TOption& option, ::Union::HookType hookType = ::Union::HookType::Hook_Auto);
+		inline BindedHook(::Union::AnyPtr from, TFunction to, ::Union::HookType hookType = ::Union::HookType::Hook_CallPatch);
+		inline BindedHook(::Union::AnyPtr from, TFunction to, TOption& option, ::Union::HookType hookType = ::Union::HookType::Hook_CallPatch);
 		inline BindedHook(BindedHook&& other);
 		inline BindedHook& operator=(BindedHook&& other);
 		inline ~BindedHook();
