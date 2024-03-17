@@ -3,3 +3,5 @@
 #include <Service/ZenGin/Symbol.h>
 #include <Service/ZenGin/StringPool.h>
 #include <Service/ZenGin/ParserExtensions.h>
+#include <Service/ZenGin/StringFunctors.h>
+
