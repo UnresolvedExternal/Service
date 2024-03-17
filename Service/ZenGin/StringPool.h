@@ -6,6 +6,7 @@ namespace GOTHIC_NAMESPACE
 		{
 		public:
 			inline zSTRING& AddString(const char* text);
+			inline zSTRING& AddString(const zSTRING& text);
 
 			inline static StringPool& GetInstance();
 
@@ -27,6 +28,11 @@ namespace GOTHIC_NAMESPACE
 
 			strings.push_back(std::make_unique<zSTRING>(text));
 			return *strings.back();
+		}
+
+		zSTRING& StringPool::AddString(const zSTRING& text)
+		{
+			return AddString(text.ToChar());
 		}
 
 		StringPool& StringPool::GetInstance()

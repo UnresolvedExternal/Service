@@ -2,7 +2,7 @@
 
 namespace GOTHIC_NAMESPACE
 {
-#define ZOPTION(name, value) ActiveOption name{ PROJECT_NAME, #name, value }
+#define ZOPTION(name, value) auto name{ ::GOTHIC_NAMESPACE::Internals::CreateActiveOption(PROJECT_NAME, #name, value) }
 
 	class ActiveOptionBase
 	{
@@ -61,6 +61,14 @@ namespace GOTHIC_NAMESPACE
 		OptionValue<T> value;
 		OptionValue<T> defaultValue;
 	};
+
+	namespace Internals
+	{
+		template <typename T>
+		inline ActiveOption<std::remove_reference_t<T>> CreateActiveOption(const char* section, const char* entry, T&& defaultValue);
+
+		inline ActiveOption<std::string> CreateActiveOption(const char* section, const char* entry, const char* defaultValue);
+	}
 
 #pragma region Implementation
 
@@ -260,6 +268,20 @@ namespace GOTHIC_NAMESPACE
 
 		value = newValue;
 		OnChange();
+	}
+
+	namespace Internals
+	{
+		template <typename T>
+		ActiveOption<std::remove_reference_t<T>> CreateActiveOption(const char* section, const char* entry, T&& defaultValue)
+		{
+			return { section, entry, std::move(defaultValue) };
+		}
+
+		ActiveOption<std::string> CreateActiveOption(const char* section, const char* entry, const char* defaultValue)
+		{
+			return { section, entry, std::string{ defaultValue } };
+		}
 	}
 
 #pragma endregion

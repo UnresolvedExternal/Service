@@ -40,6 +40,9 @@ namespace Union
 {
 	inline std::weak_ordering operator<=>(const StringANSI& left, const StringANSI& right);
 	inline std::weak_ordering operator<=>(const StringANSI& left, const char* right);
+	
+	template <size_t N>
+	inline std::weak_ordering operator<=>(const StringANSI& left, const char (&right)[N]);
 }
 
 namespace std
@@ -58,7 +61,7 @@ namespace std
 
 	bool less<StringANSI>::operator()(const StringANSI& x, const StringANSI& y) const
 	{
-		return x.GetDifference(y, Union::StringBase::Flags::IgnoreCase);
+		return x.GetDifference(y, Union::StringBase::Flags::IgnoreCase) < 0;
 	}
 
 #if __cplusplus > 202002L
@@ -90,5 +93,11 @@ namespace Union
 		if (diff < 0) return std::weak_ordering::less;
 		if (diff > 0) return std::weak_ordering::greater;
 		return std::weak_ordering::equivalent;
+	}
+
+	template <size_t N>
+	std::weak_ordering operator<=>(const StringANSI& left, const char (&right)[N])
+	{
+		return left <=> static_cast<const char*>(right);
 	}
 }
