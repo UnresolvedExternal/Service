@@ -11,3 +11,4 @@
 #include <Service/Common/BindedHook.h>
 #include <Service/Common/HookMacro.h>
 #include <Service/Common/MemoryView.h>
+#include <Service/Common/zPtr.h>
