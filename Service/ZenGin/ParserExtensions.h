@@ -1,33 +1,42 @@
 namespace GOTHIC_NAMESPACE
 {
-#define ZEXTERNAL(name, ret, ...) \
-	void name(); \
+
+#ifndef __ZEXTERNAL
+#define __ZEXTERNAL
+
+#define ZEXTERNAL_EX(cppName, dName, parser, ret, ...) \
+	void cppName(); \
 	namespace Internals \
 	{ \
-		::Service::GameSub reg_ ## name(ZTEST(GameEvent::DefineExternals), [] \
+		::Service::GameSub reg_ ## cppName(ZTEST(GameEvent::DefineExternals), [] \
 			{ \
-				::GOTHIC_NAMESPACE::Internals::RegisterExternalFunc<ret, __VA_ARGS__>(parser, #name, &name); \
+				::GOTHIC_NAMESPACE::Internals::RegisterExternalFunc<ret, __VA_ARGS__>(parser, dName, cppName); \
 			} \
 		); \
 	} \
-	void name()
+	void cppName()
+
+#define ZEXTERNAL(name, ret, ...) ZEXTERNAL_EX(name, #name, parser, ret, __VA_ARGS__)
+#define ZEXTERNAL_NAMESPACE(name, ret, ...) ZEXTERNAL_EX(name, (std::string{ PROJECT_NAME } + ":" + #name).c_str(), parser, ret, __VA_ARGS__)
+
+#endif
 
 	template <ParserType... TArgs>
 	inline void zARGS(TArgs&... args);
 
-	template <ParserType T>
+	template <ParserArgument T>
 	inline void zRETURN(const T& value);
 
 	template <ParserType... TArgs>
 	inline void PopArguments(zCParser* parser, TArgs&... args);
 
-	template <ParserType T>
+	template <ParserArgument T>
 	inline void SetReturn(zCParser* parser, const T& value);
 
-	template <ParserType TReturn, ParserType... TArgs>
+	template <ParserType TReturn, ParserArgument... TArgs>
 	inline TReturn Call(zCParser* parser, const char* function, const TArgs&... args);
 
-	template <ParserType TReturn, ParserType... TArgs>
+	template <ParserType TReturn, ParserArgument... TArgs>
 	inline TReturn Call(zCParser* parser, int function, const TArgs&... args);
 
 	namespace Internals
@@ -42,16 +51,17 @@ namespace GOTHIC_NAMESPACE
 
 		inline void PushArguments(zCParser* parser, int junk);
 
-		template <ParserType T>
+		template <ParserArgument T>
 		inline void PushArgument(zCParser* parser, int useSymbolIndex, const T& arg);
 
 		template <ParserType THead, ParserType... TTail>
 		inline void PushArguments(zCParser* parser, int startSymbolIndex, const THead& head, const TTail&... tail);
 
-		template <ParserType T>
+		template <typename T>
+			requires ParserType<T> || ParserArgument<T>
 		inline constexpr int GetParserType();
 
-		template <ParserType TReturn, ParserType... TArgs>
+		template <ParserType TReturn, ParserArgument... TArgs>
 		inline void RegisterExternalFunc(zCParser* parser, const char* name, AnyPtr function);
 	}
 
@@ -63,7 +73,7 @@ namespace GOTHIC_NAMESPACE
 		PopArguments(zCParser::GetParser(), args...);
 	}
 
-	template <ParserType T>
+	template <ParserArgument T>
 	void zRETURN(const T& value)
 	{
 		SetReturn(zCParser::GetParser(), value);
@@ -75,19 +85,19 @@ namespace GOTHIC_NAMESPACE
 		Internals::PopArguments(parser, args...);
 	}
 
-	template <ParserType T>
+	template <ParserArgument T>
 	void SetReturn(zCParser* parser, const T& value)
 	{
 		Internals::PushArguments(parser, -1, value);
 	}
 
-	template <ParserType TReturn, ParserType... TArgs>
+	template <ParserType TReturn, ParserArgument... TArgs>
 	TReturn Call(zCParser* parser, const char* function, const TArgs&... args)
 	{
 		return Call<TReturn>(parser, parser->GetIndex(zSTRING{ function }.Upper()), args...);
 	}
 
-	template <ParserType TReturn, ParserType... TArgs>
+	template <ParserType TReturn, ParserArgument... TArgs>
 	TReturn Call(zCParser* parser, int function, const TArgs&... args)
 	{
 		Symbol symbol{ parser, function };
@@ -147,15 +157,15 @@ namespace GOTHIC_NAMESPACE
 
 		}
 
-		template <ParserType T>
+		template <ParserArgument T>
 		void PushArgument(zCParser* parser, int useSymbolIndex, const T& arg)
 		{
 			if constexpr (::Service::Internals::SameAsAny<T, int, bool, unsigned>)
 				parser->SetReturn(static_cast<int>(arg));
 			else if constexpr (::Service::Internals::SameAsAny<T, float>)
 				parser->SetReturn(arg);
-			else if constexpr (::Service::Internals::SameAsAny<T, zSTRING>)
-				parser->SetReturn(Internals::StringPool::GetInstance().AddString(arg.ToChar()));
+			else if constexpr (::Service::Internals::SameAsAny<T, zSTRING, const char*>)
+				parser->SetReturn(Internals::StringPool::GetInstance().AddString(arg));
 			else if (useSymbolIndex == -1)
 				parser->SetReturn(static_cast<void*>(arg));
 			else
@@ -173,7 +183,8 @@ namespace GOTHIC_NAMESPACE
 			PushArguments(parser, startSymbolIndex, tail...);
 		}
 
-		template <ParserType T>
+		template <typename T>
+			requires ParserType<T> || ParserArgument<T>
 		constexpr int GetParserType()
 		{
 			if constexpr (::Service::Internals::SameAsAny<T, int, bool>)
@@ -182,7 +193,7 @@ namespace GOTHIC_NAMESPACE
 				return zPAR_TYPE_FLOAT;
 			else if constexpr (::Service::Internals::SameAsAny<T, unsigned>)
 				return zPAR_TYPE_FUNC;
-			else if constexpr (::Service::Internals::SameAsAny<T, zSTRING>)
+			else if constexpr (::Service::Internals::SameAsAny<T, zSTRING, const char*>)
 				return zPAR_TYPE_STRING;
 			else if constexpr (std::is_pointer_v<T>)
 				return zPAR_TYPE_INSTANCE;
@@ -190,7 +201,7 @@ namespace GOTHIC_NAMESPACE
 				return zPAR_TYPE_VOID;
 		}
 
-		template <ParserType TReturn, ParserType... TArgs>
+		template <ParserType TReturn, ParserArgument... TArgs>
 		void RegisterExternalFunc(zCParser* parser, const char* name, AnyPtr function)
 		{
 			parser->DefineExternal(name, static_cast<int(*)()>(static_cast<void*>(function)), GetParserType<TReturn>(), GetParserType<TArgs>()..., zPAR_TYPE_VOID);

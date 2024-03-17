@@ -3,6 +3,9 @@ namespace GOTHIC_NAMESPACE
 	template <typename T>
 	concept ParserType = ::Service::Internals::SameAsAny<T, void, int, bool, unsigned, float, zSTRING> || std::is_pointer_v<T>;
 
+	template <typename T>
+	concept ParserArgument = ParserType<T> && !::Service::Internals::SameAsAny<T, void> || ::Service::Internals::SameAsAny<T, const char*>;
+
 	enum class SymbolType
 	{
 		Invalid,
@@ -150,7 +153,7 @@ namespace GOTHIC_NAMESPACE
 
 		case SymbolType::VarInt:
 		case SymbolType::VarFloat:
-			return symbol->ele > 1 ? &symbol->single_intdata : &symbol->intdata[0];
+			return symbol->ele == 1 ? &symbol->single_intdata : &symbol->intdata[0];
 
 		case SymbolType::VarString:
 			return &symbol->stringdata[0];
