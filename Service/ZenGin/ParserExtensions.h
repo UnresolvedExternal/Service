@@ -1,23 +1,51 @@
+#include <tuple>
+
 namespace GOTHIC_NAMESPACE
 {
 
 #ifndef __ZEXTERNAL
 #define __ZEXTERNAL
 
-#define ZEXTERNAL_EX(cppName, dName, parser, ret, ...) \
-	void cppName(); \
+#define INTERNALS_EXTERNAL_WRAPPER(cppName, suffix) \
+	void __cdecl cppName ## _ ## suffix() \
+	{ \
+		using Info = Internals::ExternalFunctionInfo<decltype(&cppName)>; \
+ \
+		[] <std::size_t... Indexes> (std::index_sequence<Indexes...>) \
+		{ \
+			Info::UnreferencedArguments arguments; \
+			zARGS(std::get<Indexes>(arguments)...); \
+ \
+			if constexpr (::Service::Internals::SameAsAny<Info::ReturnType, void>) \
+				cppName(std::get<Indexes>(arguments)...); \
+			else \
+				zRETURN(cppName(std::get<Indexes>(arguments)...)); \
+		}(std::make_index_sequence<std::tuple_size_v<Info::UnreferencedArguments>>{}); \
+	}
+
+#define INTERNALS_EXTERNAL_REGISTRATION(parser, cppName, dName, wrapperName) \
+	GameSub wrapperName ## _reg(ZTEST(GameEvent::DefineExternals), [] \
+	{ \
+		using Info = ExternalFunctionInfo<decltype(&cppName)>; \
+ \
+		[] <std::size_t... Indexes> (std::index_sequence<Indexes...>) \
+		{ \
+			::GOTHIC_NAMESPACE::Internals::RegisterExternalFunc< \
+				std::remove_const_t<std::remove_reference_t<Info::ReturnType>>, \
+				std::remove_reference_t<decltype(std::get<Indexes>(Info::UnreferencedArguments{}))>... \
+			>(parser, dName, &::GOTHIC_NAMESPACE::Internals::wrapperName); \
+		}(std::make_index_sequence<std::tuple_size_v<Info::ArgumentTypes>>{}); \
+	});
+
+#define ZEXTERNAL_EX(cppName, parser, dName) \
 	namespace Internals \
 	{ \
-		::Service::GameSub reg_ ## cppName(ZTEST(GameEvent::DefineExternals), [] \
-			{ \
-				::GOTHIC_NAMESPACE::Internals::RegisterExternalFunc<ret, __VA_ARGS__>(parser, dName, cppName); \
-			} \
-		); \
-	} \
-	void cppName()
+		INTERNALS_EXTERNAL_WRAPPER(cppName, wrapper) \
+		INTERNALS_EXTERNAL_REGISTRATION(parser, cppName, dName, cppName ## _wrapper) \
+	}
 
-#define ZEXTERNAL(name, ret, ...) ZEXTERNAL_EX(name, #name, parser, ret, __VA_ARGS__)
-#define ZEXTERNAL_NAMESPACE(name, ret, ...) ZEXTERNAL_EX(name, (std::string{ PROJECT_NAME } + ":" + #name).c_str(), parser, ret, __VA_ARGS__)
+#define ZEXTERNAL(cppName) ZEXTERNAL_EX(cppName, parser, #cppName)
+#define ZEXTERNAL_NS(cppName) ZEXTERNAL_EX(cppName, parser, (std::string{ PROJECT_NAME } + ":" + #cppName).c_str())
 
 #endif
 
@@ -63,6 +91,17 @@ namespace GOTHIC_NAMESPACE
 
 		template <ParserType TReturn, ParserArgument... TArgs>
 		inline void RegisterExternalFunc(zCParser* parser, const char* name, AnyPtr function);
+
+		template <typename T>
+		struct ExternalFunctionInfo;
+
+		template <typename TReturn, typename... TArgs>
+		struct ExternalFunctionInfo<TReturn(*)(TArgs...)>
+		{
+			typedef TReturn ReturnType;
+			typedef std::tuple<TArgs...> ArgumentTypes;
+			typedef std::tuple<std::remove_const_t<std::remove_reference_t<TArgs>>...> UnreferencedArguments;
+		};
 	}
 
 #pragma region Implementation
