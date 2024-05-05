@@ -6,7 +6,9 @@ namespace Service
 	class MemoryView
 	{
 	public:
-		inline MemoryView(::Union::AnyPtr address, bool lockBack = false, bool flush = true);
+		template <typename E>
+		inline explicit MemoryView(const E& address, bool lockBack = false, bool flush = true);
+
 		inline MemoryView(MemoryView&& other);
 		inline MemoryView& operator=(MemoryView&& other);
 		inline ~MemoryView();
@@ -32,8 +34,9 @@ namespace Service
 namespace Service
 {
 	template <typename T>
-	MemoryView<T>::MemoryView(::Union::AnyPtr address, bool lockBack, bool flush) :
-		memory{ static_cast<T*>(address) },
+	template <typename E>
+	MemoryView<T>::MemoryView(const E& address, bool lockBack, bool flush) :
+		memory{ static_cast<T*>(reinterpret_cast<void*>(address)) },
 		lockBack{ lockBack },
 		flush{ flush }
 	{
