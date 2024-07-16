@@ -249,9 +249,6 @@ namespace Service
 		procInitialized[index] = true;
 		const GameEvent event = GetEvent(index);
 
-		if (!zSwitch(true, true)) // spacer?
-			return;
-
 		if (event == GameEvent::Loop)
 		{
 			if (initDone)

@@ -106,7 +106,7 @@ namespace Service
 	template <typename T>
 	int MemoryView<T>::GetAddress() const
 	{
-		return static_cast<int>(memory);
+		return reinterpret_cast<int>(memory);
 	}
 
 	template <typename T>
