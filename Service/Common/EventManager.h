@@ -72,6 +72,7 @@ namespace Service
 
 		inline void EnsureHookInitialized(uint32_t index);
 
+		static inline void* Allocate();
 		static inline uint32_t GetIndex(const GameEvent& event);
 		static inline GameEvent GetEvent(const uint32_t index);
 
@@ -182,7 +183,7 @@ namespace Service
 
 	EventManager& EventManager::GetInstance()
 	{
-		static EventManager eventManager;
+		static EventManager& eventManager = *reinterpret_cast<EventManager*>(Union::CreateSharedSingleton("EventManager", &EventManager::Allocate));
 		return eventManager;
 	}
 
@@ -312,6 +313,11 @@ namespace Service
 		}
 
 		::Union::CreatePartialHook(reinterpret_cast<void*>(address), procs[index]);
+	}
+
+	void* EventManager::Allocate()
+	{
+		return new EventManager{};
 	}
 
 	uint32_t EventManager::GetIndex(const GameEvent& event)
