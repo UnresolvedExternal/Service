@@ -183,7 +183,12 @@ namespace Service
 
 	EventManager& EventManager::GetInstance()
 	{
+#ifndef _DEBUG
 		static EventManager& eventManager = *reinterpret_cast<EventManager*>(Union::CreateSharedSingleton("EventManager", &EventManager::Allocate));
+#else
+		static EventManager eventManager;
+#endif
+
 		return eventManager;
 	}
 
