@@ -13,3 +13,5 @@
 #include <Service/Common/MemoryView.h>
 #include <Service/Common/zPtr.h>
 #include <Service/Common/KeyNameHelper.h>
+#include <Service/Common/Randomizer.h>
+#include <Service/Common/Serializing.h>
